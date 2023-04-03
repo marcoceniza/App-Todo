@@ -3,8 +3,8 @@
     <ion-content :fullscreen="true">
       <div id="container">
         <h2>Todo</h2>
-        <ion-button @click="$router.push('/login')">Login</ion-button>
-        <ion-button>Signup</ion-button>
+        <ion-button @click="$router.push('/login')">SIGNIN</ion-button>
+        <ion-button @click="$router.push('/register')">SIGNUP</ion-button>
       </div>
     </ion-content>
   </ion-page>

@@ -1,12 +1,18 @@
 <?php
 
 namespace App\Controllers;
-use App\Models\UserModel;
+header('Access-Control-Allow-Origin: *');
+
+use App\Models\TodoModel;
 
 class Home extends BaseController
 {
     public function index()
     {
-        return view('welcome_message');
+        $model = new TodoModel();
+
+        $data = $model->fetchData();
+
+        return $this->response->setJSON(['result' => $data]);
     }
 }

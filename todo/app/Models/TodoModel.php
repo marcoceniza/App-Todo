@@ -7,10 +7,11 @@ use CodeIgniter\Model;
 class TodoModel extends Model
 {
     protected $table = 'todo';
-    protected $allowedFields = ['username', 'password'];
+    protected $allowedFields = ['user_id', 'title', 'description', 'status'];
+    protected $useTimestamps = true;
 
     public function fetchData()
     {
-
+        return $this->findAll();
     }
 }

@@ -32,7 +32,7 @@ $routes->set404Override();
 $routes->get('/', 'Home::index');
 
 $routes->post('login', 'AuthController::login');
-$routes->post('logout', 'AuthController::logout');
+$routes->post('register', 'RegisterController::register');
 
 /*
  * --------------------------------------------------------------------
