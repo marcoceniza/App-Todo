@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+header('Access-Control-Allow-Origin: *');
 use CodeIgniter\Model;
 
 class TodoModel extends Model
@@ -12,6 +12,14 @@ class TodoModel extends Model
 
     public function fetchData()
     {
-        return $this->findAll();
+        $builder = $this->db->table('user')->select('*');
+        $builder->join('todo', 'todo.user_id = user.id');
+        $result = $builder->get()->getResult();
+        return $result;
+    }
+
+    public function addData()
+    {
+        return $this->insert($data);
     }
 }

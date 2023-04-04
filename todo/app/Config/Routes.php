@@ -33,6 +33,7 @@ $routes->get('/', 'Home::index');
 
 $routes->post('login', 'AuthController::login');
 $routes->post('register', 'RegisterController::register');
+$routes->post('add', 'Home::addDataController');
 
 /*
  * --------------------------------------------------------------------

@@ -11,8 +11,24 @@ class Home extends BaseController
     {
         $model = new TodoModel();
 
-        $data = $model->fetchData();
+        $result = $model->fetchData();
+        return $this->response->setJSON(['result' => $result]);
+    }
 
-        return $this->response->setJSON(['result' => $data]);
+    public function addDataController()
+    {
+        $model = new TodoModel();
+
+        $post = $this->request->getPost(['user_id', 'title', 'description']);
+
+        $data = [
+            'user_id' => $post['user_id'],
+            'title' => $post['title'],
+            'description' => $post['description'],
+        ];
+
+        $result = $model->insert($data);
+
+        return $this->response->setJSON(['result' => $result]);
     }
 }
