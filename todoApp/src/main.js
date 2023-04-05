@@ -25,7 +25,7 @@ import '@ionic/vue/css/display.css';
 import './theme/variables.css';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080'
+  baseURL: 'http://localhost:8080/'
 });
 
 export default api;

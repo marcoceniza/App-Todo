@@ -12,11 +12,11 @@
     </ion-header>
     <ion-content :fullscreen="true">
 
-        <ion-item v-for="todo in todos" :key="todo">
+        <ion-item v-for="todo in todos" :key="todo.todo_id">
           <ion-checkbox @ionChange="todo.status = 1"></ion-checkbox>
-          <ion-label :class="todo.status == 1 ? 'active' : ''" class="ion-padding-start ion-text-wrap">{{ todo.title }}</ion-label>
+          <ion-label :class="todo.status == 1 ? 'active' : ''" class="ion-padding-start ion-text-wrap">{{ todo.title }} - {{ todo.todo_id }}</ion-label>
           <ion-buttons v-if="todo.status == 1">
-            <ion-button slot="end"><ion-icon :icon="trash"></ion-icon></ion-button>
+            <ion-button @click="deleteItem(todo.todo_id)" slot="end"><ion-icon :icon="trash"></ion-icon></ion-button>
           </ion-buttons>
         </ion-item>
 
@@ -100,7 +100,7 @@ export default({
           formData.append('title', this.title);
           formData.append('description', this.description);
 
-          api.post('/add', formData).then(() => {
+          api.post('add', formData).then(() => {
               Toast.show({
                   text: 'Added Succesfully!',
                   duration: 5000,
@@ -112,6 +112,15 @@ export default({
               }, 3000)
           })
       }
+    },
+    deleteItem(id) {
+        api.delete('delete/' + id)
+        .then(response => {
+            console.log(response.data);
+        })
+        .catch(error => {
+            console.log(error)
+        })
     }
   },
   mounted() {

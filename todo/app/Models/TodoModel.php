@@ -1,14 +1,15 @@
 <?php
 
 namespace App\Models;
-header('Access-Control-Allow-Origin: *');
+
 use CodeIgniter\Model;
 
 class TodoModel extends Model
 {
     protected $table = 'todo';
-    protected $allowedFields = ['user_id', 'title', 'description', 'status'];
+    protected $allowedFields = ['id', 'email', 'username', 'password', 'todo_id', 'user_id', 'title', 'description', 'status'];
     protected $useTimestamps = true;
+    protected $primaryKey = 'user_id';
 
     public function fetchData()
     {
@@ -18,8 +19,12 @@ class TodoModel extends Model
         return $result;
     }
 
-    public function addData()
+    public function deleteData()
     {
-        return $this->insert($data);
+        $query = $this->db->table('user')->select('*');
+        $query->join('todo', 'todo.user_id = user.id');
+        $result = $query->findAll();
+
+        return $result;
     }
 }

@@ -2,8 +2,10 @@
 
 namespace App\Controllers;
 header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, GET, DELETE, PUT, PATCH, OPTIONS');
 
 use App\Models\TodoModel;
+use CodeIgniter\RESTful\ResourceController;
 
 class Home extends BaseController
 {
@@ -30,5 +32,14 @@ class Home extends BaseController
         $result = $model->insert($data);
 
         return $this->response->setJSON(['result' => $result]);
+    }
+
+    public function delete($id)
+    {
+        $model = new TodoModel();
+
+        $result = $model->where('todo_id', $id)->delete();
+        
+        return $this->response->setJSON(['data' => $result]);
     }
 }
