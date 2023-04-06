@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Controllers;
+// defined('BASEPATH') or exit('No direct script access allowed');
 header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: *');
 header('Access-Control-Allow-Methods: POST, GET, DELETE, PUT, PATCH, OPTIONS');
 
 use App\Models\TodoModel;
@@ -29,16 +31,16 @@ class Home extends BaseController
             'description' => $post['description'],
         ];
 
-        $result = $model->insert($data);
+        $result = $model->addData($data);
 
         return $this->response->setJSON(['result' => $result]);
     }
 
-    public function delete($id)
+    public function deleteController()
     {
         $model = new TodoModel();
 
-        $result = $model->where('todo_id', $id)->delete();
+        $result = $model->deleteData($id);
         
         return $this->response->setJSON(['data' => $result]);
     }

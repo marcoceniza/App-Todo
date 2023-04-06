@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-header('Access-Control-Allow-Origin: *');
+
 use CodeIgniter\Model;
 
 class UserModel extends Model

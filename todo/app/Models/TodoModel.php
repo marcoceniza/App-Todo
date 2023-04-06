@@ -9,22 +9,23 @@ class TodoModel extends Model
     protected $table = 'todo';
     protected $allowedFields = ['id', 'email', 'username', 'password', 'todo_id', 'user_id', 'title', 'description', 'status'];
     protected $useTimestamps = true;
-    protected $primaryKey = 'user_id';
+    protected $primaryKey = 'todo_id';
 
     public function fetchData()
     {
-        $builder = $this->db->table('user')->select('*');
-        $builder->join('todo', 'todo.user_id = user.id');
-        $result = $builder->get()->getResult();
-        return $result;
+        $query = $this->join('user', 'user.id = todo.user_id')->findAll();
+        return $query;
     }
 
-    public function deleteData()
+    public function addData($data)
     {
-        $query = $this->db->table('user')->select('*');
-        $query->join('todo', 'todo.user_id = user.id');
-        $result = $query->findAll();
+        $query = $this->insert($data);
+        return $query;
+    }
 
-        return $result;
+    public function deleteData($id)
+    {
+        $query = $this->delete(['todo_id' => $id]);
+        return $query;
     }
 }
