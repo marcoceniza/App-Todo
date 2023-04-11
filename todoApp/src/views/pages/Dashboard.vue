@@ -1,8 +1,29 @@
 <template>
   <ion-page>
+    <ion-router-outlet></ion-router-outlet>
+    <ion-menu content-id="main-content">
+      <ion-header>
+        <ion-toolbar class="ion-text-center">
+          <ion-title>TODO</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-list>
+          <ion-item lines="full" button @click="$router.push('dashboard')">
+            <ion-label>Home</ion-label>
+            <ion-icon slot="start" :icon="home"></ion-icon>
+          </ion-item>
+        </ion-list>
+        <ion-button @click="logout" class="ion-padding" expand="block" color="danger">LOGOUT</ion-button>
+      </ion-content>
+    </ion-menu>
+
     <ion-header>
       <ion-toolbar>
-        <ion-title>TODO</ion-title>
+        <ion-buttons slot="start">
+          <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title class="ion-text-center">TODO</ion-title>
         <ion-buttons slot="end" @click="setOpen(true)">
           <ion-button>
             <ion-icon :icon="add" v-if="!addTextField"></ion-icon>
@@ -10,12 +31,13 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true">
+
+    <ion-content :fullscreen="true" id="main-content">
 
         <ion-item v-for="todo in todos" :key="todo.todo_id">
-          <ion-checkbox @ionChange="todo.status = 1"></ion-checkbox>
-          <ion-label :class="todo.status == 1 ? 'active' : ''" class="ion-padding-start ion-text-wrap">{{ todo.title }} - {{ todo.todo_id }}</ion-label>
-          <ion-buttons v-if="todo.status == 1">
+          <ion-checkbox v-model="todo.status"></ion-checkbox>
+          <ion-label :class="{ active : todo.status == true }" class="ion-padding-start ion-text-wrap">{{ todo.title }} - {{ todo.todo_id }}</ion-label>
+          <ion-buttons v-if="todo.status == true">
             <ion-button @click="deleteItem(todo.todo_id)" slot="end"><ion-icon :icon="trash"></ion-icon></ion-button>
           </ion-buttons>
         </ion-item>
@@ -53,15 +75,15 @@
 </template>
 
 <script>
-import { IonContent, IonPage, IonToolbar, IonHeader, IonTitle, IonButtons, IonButton, IonItem, IonInput, IonList, IonIcon, IonCheckbox, IonLabel, IonModal, IonSpinner } from '@ionic/vue';
-import { add, close, trash } from 'ionicons/icons';
+import { IonContent, IonPage, IonToolbar, IonHeader, IonTitle, IonButtons, IonButton, IonItem, IonInput, IonList, IonIcon, IonCheckbox, IonLabel, IonModal, IonSpinner, IonMenu, IonRouterOutlet, IonMenuButton } from '@ionic/vue';
+import { add, close, trash, home } from 'ionicons/icons';
 import api from '@/main';
 import { Toast } from '@capacitor/toast';
 
 export default({
   name: 'DashboardPage',
-  components: { IonContent, IonPage, IonToolbar, IonHeader, IonTitle, IonButtons, IonButton, IonItem, IonInput, IonList, IonIcon, IonCheckbox, IonLabel, IonModal, IonSpinner },
-  setup() { return { add, close, trash } },
+  components: { IonContent, IonPage, IonToolbar, IonHeader, IonTitle, IonButtons, IonButton, IonItem, IonInput, IonList, IonIcon, IonCheckbox, IonLabel, IonModal, IonSpinner, IonMenu, IonRouterOutlet, IonMenuButton },
+  setup() { return { add, close, trash, home } },
   data() {
       return {
         addTextField: false,
@@ -77,6 +99,11 @@ export default({
       }
   },
   methods: {
+    logout() {
+      localStorage.clear();
+      this.$router.push('login');
+      setTimeout(() => window.location.reload(), 2000);
+    },
     addNew() {
       this.addTextField = !this.addTextField;
     },
@@ -114,13 +141,16 @@ export default({
       }
     },
     deleteItem(id) {
-        api.delete('delete/' + id)
-        .then(response => {
-            console.log(response.data);
-        })
-        .catch(error => {
-            console.log(error)
-        })
+      const formData = new FormData();
+      formData.append('id', id);
+
+      api.post('delete/', formData)
+      .then(response => {
+          console.log(response.data);
+      })
+      .catch(error => {
+          console.log(error)
+      })
     }
   },
   mounted() {

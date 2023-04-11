@@ -25,7 +25,7 @@ class TodoModel extends Model
 
     public function deleteData($id)
     {
-        $query = $this->delete(['todo_id' => $id]);
+        $query = $this->delete($id);
         return $query;
     }
 }
