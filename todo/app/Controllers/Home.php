@@ -18,6 +18,11 @@ class Home extends BaseController
         return $this->response->setJSON(['result' => $result]);
     }
 
+    public function test()
+    {
+        echo 'success..';
+    }
+
     public function addDataController()
     {
         $model = new TodoModel();
@@ -31,6 +36,22 @@ class Home extends BaseController
         ];
 
         $result = $model->addData($data);
+
+        return $this->response->setJSON(['result' => $result]);
+    }
+
+    public function updateDataController()
+    {
+        $model = new TodoModel();
+
+        $post = $this->request->getPost(['todo_id', 'editTitle', 'editDescription']);
+
+        $data = [
+            'title' => $post['editTitle'],
+            'description' => $post['editDescription'],
+        ];
+
+        $result = $model->updateData($post['todo_id'], $data);
 
         return $this->response->setJSON(['result' => $result]);
     }

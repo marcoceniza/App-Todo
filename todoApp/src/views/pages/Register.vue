@@ -30,7 +30,7 @@
 
 <script>
 import { IonPage, IonList, IonInput, IonButton, IonItem, IonButtons, IonContent, IonHeader, IonToolbar, IonIcon, IonSpinner } from '@ionic/vue';
-import axios from 'axios';
+import axiosRes from '@/main';
 import { chevronBack } from 'ionicons/icons';
 import { Toast } from '@capacitor/toast';
 
@@ -65,7 +65,7 @@ export default({
             formData.append('username', this.username);
             formData.append('password', this.password);
 
-            axios.post('http://localhost:8080/register', formData).then(() => {
+            axiosRes.post('/register/', formData).then(() => {
 
                 this.$router.push('login');
 

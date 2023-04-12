@@ -29,7 +29,7 @@
 import { IonPage, IonList, IonInput, IonButton, IonItem, IonButtons, IonContent, IonHeader, IonToolbar, IonIcon, IonSpinner } from '@ionic/vue';
 import { chevronBack } from 'ionicons/icons';
 import { Toast } from '@capacitor/toast';
-import api from '@/main';
+import axiosRes from '@/main';
 
 export default({
   name: 'LoginPage',
@@ -59,7 +59,7 @@ export default({
 
         this.loaderIcon = true;
 
-        api.post('/login', formData).then(res => {
+        axiosRes.post('/login/', formData).then(res => {
 
           if(res.data.error) {
             Toast.show({

@@ -23,6 +23,12 @@ class TodoModel extends Model
         return $query;
     }
 
+    public function updateData($id, $data)
+    {
+        $query = $this->update($id, $data);
+        return $query;
+    }
+
     public function deleteData($id)
     {
         $query = $this->delete($id);

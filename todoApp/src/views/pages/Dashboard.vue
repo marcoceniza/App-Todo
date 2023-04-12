@@ -34,9 +34,14 @@
 
     <ion-content :fullscreen="true" id="main-content">
 
-        <ion-item v-for="todo in todos" :key="todo.todo_id">
+        <ion-text class="noTask" color="medium" v-if="isLoading">Loading Task...</ion-text>
+
+        <ion-item v-else v-for="todo in todos" :key="todo.todo_id">
           <ion-checkbox v-model="todo.status"></ion-checkbox>
-          <ion-label :class="{ active : todo.status == true }" class="ion-padding-start ion-text-wrap">{{ todo.title }} - {{ todo.todo_id }}</ion-label>
+          <ion-label :class="{ active : todo.status == true }" class="ion-padding-start ion-text-wrap">{{ todo.title }}</ion-label>
+          <ion-buttons>
+            <ion-button @click="getItem(todo.todo_id); setOpen2(true)" slot="end"><ion-icon :icon="create"></ion-icon></ion-button>
+          </ion-buttons>
           <ion-buttons v-if="todo.status == true">
             <ion-button @click="deleteItem(todo.todo_id)" slot="end"><ion-icon :icon="trash"></ion-icon></ion-button>
           </ion-buttons>
@@ -70,20 +75,48 @@
           </ion-content>
         </ion-modal>
 
+        <ion-modal :is-open="isOpen2">
+          <ion-header>
+            <ion-toolbar>
+              <ion-title color="medium">Update Task</ion-title>
+              <ion-buttons slot="end">
+                <ion-button @click="setOpen2(false)"><ion-icon :icon="close"></ion-icon></ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+          <ion-content class="ion-padding">
+            <ion-list>
+              <ion-item>
+                  <ion-input v-model="editTitle" label="Title" label-placement="stacked" type="text" name="title" :clear-input="true" placeholder="Enter title"></ion-input>
+              </ion-item>
+              <ion-item>
+                  <ion-input v-model="editDescription" label="Description" label-placement="stacked" type="text" name="description" :clear-input="true" placeholder="Enter description"></ion-input>
+              </ion-item>
+              <ion-item>
+                  <ion-input label="Updated_At" label-placement="stacked" v-model="updated_at" type="text" disabled></ion-input>
+              </ion-item>
+              <ion-button @click="updateItem" class="ion-padding ion-margin-bottom" expand="block">
+                <span v-if="!loaderIcon">UPDATE</span>
+                <span v-if="loaderIcon"><ion-spinner name="crescent"></ion-spinner></span>
+              </ion-button>
+            </ion-list>
+          </ion-content>
+        </ion-modal>
+
     </ion-content>
   </ion-page>
 </template>
 
 <script>
-import { IonContent, IonPage, IonToolbar, IonHeader, IonTitle, IonButtons, IonButton, IonItem, IonInput, IonList, IonIcon, IonCheckbox, IonLabel, IonModal, IonSpinner, IonMenu, IonRouterOutlet, IonMenuButton } from '@ionic/vue';
-import { add, close, trash, home } from 'ionicons/icons';
-import api from '@/main';
+import { IonContent, IonPage, IonToolbar, IonHeader, IonTitle, IonButtons, IonButton, IonItem, IonInput, IonList, IonIcon, IonCheckbox, IonLabel, IonModal, IonSpinner, IonMenu, IonRouterOutlet, IonMenuButton, IonText } from '@ionic/vue';
+import { add, close, trash, home, create } from 'ionicons/icons';
+import axiosRes from '@/main';
 import { Toast } from '@capacitor/toast';
 
 export default({
   name: 'DashboardPage',
-  components: { IonContent, IonPage, IonToolbar, IonHeader, IonTitle, IonButtons, IonButton, IonItem, IonInput, IonList, IonIcon, IonCheckbox, IonLabel, IonModal, IonSpinner, IonMenu, IonRouterOutlet, IonMenuButton },
-  setup() { return { add, close, trash, home } },
+  components: { IonContent, IonPage, IonToolbar, IonHeader, IonTitle, IonButtons, IonButton, IonItem, IonInput, IonList, IonIcon, IonCheckbox, IonLabel, IonModal, IonSpinner, IonMenu, IonRouterOutlet, IonMenuButton, IonText },
+  setup() { return { add, close, trash, home, create } },
   data() {
       return {
         addTextField: false,
@@ -91,14 +124,40 @@ export default({
         isChecked: false,
         todos: [],
         isOpen: false,
+        isOpen2: false,
         title: '',
+        editTitle: '',
         description: '',
+        editDescription: '',
         created_at: new Date().toLocaleString(),
+        updated_at: new Date().toLocaleString(),
         loaderIcon: false,
-        storage: JSON.parse(localStorage.getItem('user'))
+        storage: JSON.parse(localStorage.getItem('user')),
+        isLoading: true,
+        todoID: ''
       }
   },
   methods: {
+    getItem(id) {
+      this.todos.forEach(res => {
+        if(res.todo_id == id) {
+          this.todoID = res.todo_id;
+          this.editTitle = res.title;
+          this.editDescription = res.description;
+        }
+      });
+    },
+    updateItem() {
+      const formData = new FormData();
+      formData.append('todo_id', this.todoID);
+      formData.append('editTitle', this.editTitle);
+      formData.append('editDescription', this.editDescription);
+
+      axiosRes.post('/update/', formData).then(res => {
+        console.log(res.data.result);
+        window.location.reload();
+      })
+    },
     logout() {
       localStorage.clear();
       this.$router.push('login');
@@ -109,6 +168,9 @@ export default({
     },
     setOpen(isOpen) {
       this.isOpen = isOpen;
+    },
+    setOpen2(isOpen2) {
+      this.isOpen2 = isOpen2;
     },
     addData() {
       if(this.title == '' || this.description == '') {
@@ -127,7 +189,7 @@ export default({
           formData.append('title', this.title);
           formData.append('description', this.description);
 
-          api.post('add', formData).then(() => {
+          axiosRes.post('/add/', formData).then(() => {
               Toast.show({
                   text: 'Added Succesfully!',
                   duration: 5000,
@@ -144,20 +206,17 @@ export default({
       const formData = new FormData();
       formData.append('id', id);
 
-      api.post('delete/', formData)
-      .then(response => {
-          console.log(response.data);
-      })
-      .catch(error => {
-          console.log(error)
+      axiosRes.post('/delete/', formData).then(res => {
+          console.log(res.data);
       })
     }
   },
   mounted() {
-    api.get('/').then(res => {
+    axiosRes.get('/').then(res => {
       res.data.result.forEach(res => {
         if(res.id == this.storage.id) {
           this.todos.push(res);
+          this.isLoading = false;
         }
       });
     });
@@ -174,5 +233,11 @@ export default({
 .active {
   text-decoration: line-through;
   --color: #ff4961 !important;
+}
+
+.noTask {
+  display: block;
+  text-align: center;
+  margin-top: 60px;
 }
 </style>

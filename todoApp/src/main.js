@@ -24,11 +24,11 @@ import '@ionic/vue/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 
-const api = axios.create({
-  baseURL: 'http://localhost:8080/'
+const axiosRes = axios.create({
+  baseURL: 'http://localhost:8080'
 });
 
-export default api;
+export default axiosRes;
 
 const app = createApp(App)
   .use(IonicVue)
