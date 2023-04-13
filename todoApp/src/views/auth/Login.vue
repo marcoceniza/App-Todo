@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-header>
-      <ion-toolbar>
+      <ion-toolbar color="primary">
         <ion-buttons slot="start">
           <ion-button @click="$router.push('welcome')"><ion-icon :icon="chevronBack"></ion-icon></ion-button>
         </ion-buttons>
@@ -14,7 +14,13 @@
                 <ion-input v-model="email" type="email" name="email" label="Email" labelPlacement="stacked" placeholder="Enter email"></ion-input>
             </ion-item>
             <ion-item>
-                <ion-input v-model="password" type="password" name="password" label="Password" labelPlacement="stacked" placeholder="Enter password"></ion-input>
+                <ion-input v-model="password" :type="inputType" name="password" label="Password" labelPlacement="stacked" placeholder="Enter password"></ion-input>
+                <ion-button @click="toggleIcon" v-if="password != ''" fill="none">
+                  <ion-buttons slot="end">
+                    <ion-icon v-if="inputType == 'password'" :icon="eye"></ion-icon>
+                    <ion-icon v-else :icon="eyeOff"></ion-icon>
+                  </ion-buttons>
+                </ion-button>
             </ion-item>
             <ion-button @click.prevent="submitForm" class="ion-padding" expand="block">
               <span v-if="!loaderIcon">SIGNIN</span>
@@ -27,22 +33,26 @@
 
 <script>
 import { IonPage, IonList, IonInput, IonButton, IonItem, IonButtons, IonContent, IonHeader, IonToolbar, IonIcon, IonSpinner } from '@ionic/vue';
-import { chevronBack } from 'ionicons/icons';
+import { chevronBack, eye, eyeOff } from 'ionicons/icons';
 import { Toast } from '@capacitor/toast';
 import axiosRes from '@/main';
 
 export default({
   name: 'LoginPage',
   components: { IonPage, IonList, IonInput, IonButton, IonItem, IonButtons, IonContent, IonHeader, IonToolbar, IonIcon, IonSpinner },
-  setup() { return { chevronBack } },
+  setup() { return { chevronBack, eye, eyeOff } },
   data() {
     return {
       email: '',
       password: '',
-      loaderIcon: false
+      loaderIcon: false,
+      inputType: 'password'
     }
   },
   methods: {
+    toggleIcon() {
+      this.inputType = this.inputType === 'password' ? 'text' : 'password';
+    },
     submitForm() {
       if(this.email == '' || this.password == '') {
           Toast.show({
@@ -59,7 +69,7 @@ export default({
 
         this.loaderIcon = true;
 
-        axiosRes.post('/login/', formData).then(res => {
+        axiosRes.post('/login', formData).then(res => {
 
           if(res.data.error) {
             Toast.show({

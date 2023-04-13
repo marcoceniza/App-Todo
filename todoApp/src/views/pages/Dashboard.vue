@@ -3,7 +3,7 @@
     <ion-router-outlet></ion-router-outlet>
     <ion-menu content-id="main-content">
       <ion-header>
-        <ion-toolbar class="ion-text-center">
+        <ion-toolbar class="ion-text-center" color="primary">
           <ion-title>TODO</ion-title>
         </ion-toolbar>
       </ion-header>
@@ -19,7 +19,7 @@
     </ion-menu>
 
     <ion-header>
-      <ion-toolbar>
+      <ion-toolbar color="primary">
         <ion-buttons slot="start">
           <ion-menu-button></ion-menu-button>
         </ion-buttons>
@@ -43,14 +43,14 @@
             <ion-button @click="getItem(todo.todo_id); setOpen2(true)" slot="end"><ion-icon :icon="create"></ion-icon></ion-button>
           </ion-buttons>
           <ion-buttons v-if="todo.status == true">
-            <ion-button @click="deleteItem(todo.todo_id)" slot="end"><ion-icon :icon="trash"></ion-icon></ion-button>
+            <ion-button @click="confirmDeleteData(todo.todo_id)" slot="end"><ion-icon :icon="trash"></ion-icon></ion-button>
           </ion-buttons>
         </ion-item>
 
         <ion-modal :is-open="isOpen">
           <ion-header>
-            <ion-toolbar>
-              <ion-title color="medium">New Task</ion-title>
+            <ion-toolbar color="primary">
+              <ion-title>New Task</ion-title>
               <ion-buttons slot="end">
                 <ion-button @click="setOpen(false)"><ion-icon :icon="close"></ion-icon></ion-button>
               </ion-buttons>
@@ -77,8 +77,8 @@
 
         <ion-modal :is-open="isOpen2">
           <ion-header>
-            <ion-toolbar>
-              <ion-title color="medium">Update Task</ion-title>
+            <ion-toolbar color="primary">
+              <ion-title>Update Task</ion-title>
               <ion-buttons slot="end">
                 <ion-button @click="setOpen2(false)"><ion-icon :icon="close"></ion-icon></ion-button>
               </ion-buttons>
@@ -108,7 +108,7 @@
 </template>
 
 <script>
-import { IonContent, IonPage, IonToolbar, IonHeader, IonTitle, IonButtons, IonButton, IonItem, IonInput, IonList, IonIcon, IonCheckbox, IonLabel, IonModal, IonSpinner, IonMenu, IonRouterOutlet, IonMenuButton, IonText } from '@ionic/vue';
+import { IonContent, IonPage, IonToolbar, IonHeader, IonTitle, IonButtons, IonButton, IonItem, IonInput, IonList, IonIcon, IonCheckbox, IonLabel, IonModal, IonSpinner, IonMenu, IonRouterOutlet, IonMenuButton, IonText, actionSheetController } from '@ionic/vue';
 import { add, close, trash, home, create } from 'ionicons/icons';
 import axiosRes from '@/main';
 import { Toast } from '@capacitor/toast';
@@ -118,26 +118,60 @@ export default({
   components: { IonContent, IonPage, IonToolbar, IonHeader, IonTitle, IonButtons, IonButton, IonItem, IonInput, IonList, IonIcon, IonCheckbox, IonLabel, IonModal, IonSpinner, IonMenu, IonRouterOutlet, IonMenuButton, IonText },
   setup() { return { add, close, trash, home, create } },
   data() {
-      return {
-        addTextField: false,
-        newTask: '',
-        isChecked: false,
-        todos: [],
-        isOpen: false,
-        isOpen2: false,
-        title: '',
-        editTitle: '',
-        description: '',
-        editDescription: '',
-        created_at: new Date().toLocaleString(),
-        updated_at: new Date().toLocaleString(),
-        loaderIcon: false,
-        storage: JSON.parse(localStorage.getItem('user')),
-        isLoading: true,
-        todoID: ''
-      }
+    return {
+      addTextField: false,
+      newTask: '',
+      isChecked: false,
+      todos: [],
+      isOpen: false,
+      isOpen2: false,
+      title: '',
+      editTitle: '',
+      description: '',
+      editDescription: '',
+      created_at: '',
+      updated_at: '',
+      loaderIcon: false,
+      storage: JSON.parse(localStorage.getItem('user')),
+      isLoading: true,
+      todoID: ''
+    }
   },
   methods: {
+    async confirmDeleteData(id) {
+      const confirmDelete = await actionSheetController.create({
+        header: 'Are you sure you want to delete?',
+        buttons: [
+          {
+            text: 'Delete',
+            role: 'destructive',
+            handler: () => {
+              const formData = new FormData();
+              formData.append('id', id);
+
+              axiosRes.post('/delete', formData).then(() => {
+                Toast.show({
+                  text: 'Deleted Succesfully!',
+                  duration: 5000,
+                  position: 'top',
+                });
+
+                setTimeout(() => { window.location.reload() }, 2000);
+              })
+            }
+          },
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            data: {
+              action: 'cancel',
+            },
+          },
+        ],
+      });
+
+      await confirmDelete.present();
+    },
     getItem(id) {
       this.todos.forEach(res => {
         if(res.todo_id == id) {
@@ -153,13 +187,27 @@ export default({
       formData.append('editTitle', this.editTitle);
       formData.append('editDescription', this.editDescription);
 
-      axiosRes.post('/update/', formData).then(res => {
-        console.log(res.data.result);
-        window.location.reload();
+      this.loaderIcon = true;
+
+      axiosRes.post('/update', formData).then(() => {
+        Toast.show({
+            text: 'Updated Succesfully!',
+            duration: 5000,
+            position: 'top',
+        });
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000)
       })
     },
     logout() {
       localStorage.clear();
+      Toast.show({
+        text: 'Logout Succesfully!',
+        duration: 5000,
+        position: 'top',
+      });
       this.$router.push('login');
       setTimeout(() => window.location.reload(), 2000);
     },
@@ -184,32 +232,24 @@ export default({
       }else {
         this.loaderIcon = true;
 
-          const formData = new FormData();
-          formData.append('user_id', this.storage.id);
-          formData.append('title', this.title);
-          formData.append('description', this.description);
+        const formData = new FormData();
+        formData.append('user_id', this.storage.id);
+        formData.append('title', this.title);
+        formData.append('description', this.description);
 
-          axiosRes.post('/add/', formData).then(() => {
-              Toast.show({
-                  text: 'Added Succesfully!',
-                  duration: 5000,
-                  position: 'top',
-              });
+        axiosRes.post('/add', formData).then(() => {
+          Toast.show({
+              text: 'Added Succesfully!',
+              duration: 5000,
+              position: 'top',
+          });
 
-              setTimeout(() => {
-                window.location.reload();
-              }, 3000)
-          })
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000)
+        })
       }
     },
-    deleteItem(id) {
-      const formData = new FormData();
-      formData.append('id', id);
-
-      axiosRes.post('/delete/', formData).then(res => {
-          console.log(res.data);
-      })
-    }
   },
   mounted() {
     axiosRes.get('/').then(res => {
@@ -220,6 +260,11 @@ export default({
         }
       });
     });
+
+    setInterval(() => {
+      this.created_at = new Date().toLocaleString();
+      this.updated_at = new Date().toLocaleString();
+    }, 1000)
   }
 });
 </script>

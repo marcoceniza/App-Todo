@@ -20,7 +20,7 @@ class Home extends BaseController
 
     public function test()
     {
-        echo 'success..';
+        echo 'success...';
     }
 
     public function addDataController()

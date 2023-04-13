@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-header>
-      <ion-toolbar>
+      <ion-toolbar color="primary">
         <ion-buttons slot="start">
           <ion-button @click="$router.push('welcome')"><ion-icon :icon="chevronBack"></ion-icon></ion-button>
         </ion-buttons>
@@ -49,33 +49,31 @@ export default({
 
   methods: {
     registerForm() {
-        if(this.email == '' || this.username == '' || this.password == '') {
-            Toast.show({
-                text: 'All Fields are Required!',
-                duration: 5000,
-                position: 'top',
-            });
+      if(this.email == '' || this.username == '' || this.password == '') {
+          Toast.show({
+              text: 'All Fields are Required!',
+              duration: 5000,
+              position: 'top',
+          });
 
-            return;
-        }else {
-          this.loaderIcon = true;
+          return;
+      }else {
+        this.loaderIcon = true;
 
-            const formData = new FormData();
-            formData.append('email', this.email);
-            formData.append('username', this.username);
-            formData.append('password', this.password);
+        const formData = new FormData();
+        formData.append('email', this.email);
+        formData.append('username', this.username);
+        formData.append('password', this.password);
 
-            axiosRes.post('/register/', formData).then(() => {
-
-                this.$router.push('login');
-
-                Toast.show({
-                    text: 'Register Succesfully!',
-                    duration: 5000,
-                    position: 'top',
-                });
-            })
-        }
+        axiosRes.post('/register', formData).then(() => {
+          this.$router.push('login');
+          Toast.show({
+              text: 'Register Succesfully!',
+              duration: 5000,
+              position: 'top',
+          });
+        })
+      }
     }
   }
 });

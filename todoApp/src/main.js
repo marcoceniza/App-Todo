@@ -25,7 +25,7 @@ import '@ionic/vue/css/display.css';
 import './theme/variables.css';
 
 const axiosRes = axios.create({
-  baseURL: 'http://localhost:8080'
+  baseURL: 'https://todo-app23.000webhostapp.com/todo'
 });
 
 export default axiosRes;
